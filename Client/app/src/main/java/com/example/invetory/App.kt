@@ -6,5 +6,5 @@ import com.example.invetory.Screens.SignUpScreen
 
 @Composable
 fun App(){
-    LoginScreen()
+
 }

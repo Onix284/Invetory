@@ -1,5 +1,6 @@
 package com.example.invetory.Screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,10 +29,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.invetory.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(){
+fun LoginScreen(navController: NavController){
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -125,7 +128,14 @@ fun LoginScreen(){
                     Row(modifier = Modifier.align(alignment = Alignment.Center)){
                         Text(text = "Don’t have an account?", fontWeight = FontWeight.Light)
                         Spacer(modifier = Modifier.width(10.dp))
-                        Text(text = "Signup Now", fontWeight = FontWeight.Medium, color = Color.Blue)
+                        Text(text = "Signup Now",
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Blue,
+                            modifier = Modifier.clickable(
+                                onClick = {
+                                    navController.navigate(Screen.Signup.route)
+                                }
+                            ))
                     }
                 }
             }
