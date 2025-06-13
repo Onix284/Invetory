@@ -29,12 +29,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.invetory.MyViewModels.AuthViewModels
 import com.example.invetory.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navController: NavController){
+fun SignUpScreen(
+    navController: NavController,
+    viewModel : AuthViewModels = viewModel()){
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -47,7 +51,8 @@ fun SignUpScreen(navController: NavController){
         val scrollState = rememberScrollState()
         val context = LocalContext.current
 
-
+        val signupState = viewModel.signupState
+        val isLoading = viewModel.isLoading
 
         //Main Parent
         Box(modifier = Modifier
@@ -147,13 +152,13 @@ fun SignUpScreen(navController: NavController){
 
                 //Signup Button
                 FilledTonalButton(onClick = {
-
-                },
+                    viewModel.signup(name.value, email.value, password.value, shopName.value)
+                }, enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 90.dp)
                         .height(50.dp)){
-                    Text("Signup", fontSize = 15.sp)
+                    Text(if (isLoading) "Signing up..." else "Signup", fontSize = 15.sp)
                 }
 
                 Spacer(modifier = Modifier.height(25.dp))
