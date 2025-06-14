@@ -63,4 +63,7 @@ dependencies {
 
     //ktor
     implementation(libs.bundles.ktor)
+
+    //Icons
+    implementation(libs.androidx.material.icons.extended)
 }
