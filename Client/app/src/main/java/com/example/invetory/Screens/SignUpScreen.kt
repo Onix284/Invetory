@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -35,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -58,7 +56,7 @@ fun SignUpScreen(
         val name = remember { mutableStateOf("") }
         val email = remember { mutableStateOf("") }
         val password = remember { mutableStateOf("") }
-        var shopName = remember { mutableStateOf("") }
+        val shopName = remember { mutableStateOf("") }
 
 
         var passwordVisible by remember { mutableStateOf(false) }
@@ -68,7 +66,31 @@ fun SignUpScreen(
         val signupState = viewModel.signupState
         val isLoading = viewModel.isLoading
 
+        var isSubmitted by remember { mutableStateOf(false) }
 
+        //Validation Regex
+        val nameRegex = Regex("^[A-Za-z ]{2,50}$") // Name: Only letters and spaces, 2–50 characters
+        val emailRegex = Regex("^[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$") // Email: Standard email format
+        val passwordRegex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&]).{6,}$") // Password: Min 8 chars, must include uppercase, lowercase, number, and special character
+        val shopNameRegex = Regex("^[A-Za-z0-9 &.\\-]{2,100}$") // Shop Name: Letters, numbers, space, &, ., -, 2–100 characters
+
+        val nameValid = nameRegex.matches(name.value.trim())
+        val emailValid = emailRegex.matches(email.value.trim())
+        val passwordValid = passwordRegex.matches(password.value)
+        val shopNameValid = shopNameRegex.matches(shopName.value.trim())
+
+        // 2️⃣ A single flag that represents a fully valid form
+        val isFormValid =
+                nameValid &&
+                emailValid &&
+                passwordValid &&
+                shopNameValid
+
+        val isFormEmpty =
+                name.value.isNotBlank() &&
+                email.value.isNotBlank() &&
+                password.value.isNotBlank() &&
+                shopName.value.isNotBlank()
 
         /* -----------------------React to signup state ------------------------- */
         LaunchedEffect(signupState) {
@@ -78,8 +100,8 @@ fun SignUpScreen(
                         navController.navigate(Screen.Login.route){
                             popUpTo(Screen.Signup.route) {inclusive = true}
                         }
+                        Toast.makeText(context, "Signed up successfully", Toast.LENGTH_SHORT).show()
                     }
-
                 viewModel.clearSignupState()
             }
         }
@@ -123,10 +145,15 @@ fun SignUpScreen(
                     onValueChange = {name.value = it },
                     placeholder = {Text("Enter Your Name")},
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    isError = isSubmitted && !nameValid,
+                    supportingText = {
+                        if (isSubmitted && !nameValid)
+                            Text("Name should contain more than two letters only letters and spaces", color = Color.Red)
+                    }
                 )
 
-                Spacer(modifier = Modifier.height(25.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
                 //Email TextField
                 Text(
@@ -139,10 +166,17 @@ fun SignUpScreen(
                     value = email.value,
                     onValueChange = {email.value = it },
                     placeholder = {Text("Enter Your Email")},
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = isSubmitted && !emailValid,
+                    supportingText = {
+                        if(isSubmitted && !emailValid){
+                            Text("Enter Correct Email", color = Color.Red)
+                        }
+                    }
                 )
 
-                Spacer(modifier = Modifier.height(25.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
                 //Password TextField
                 Text(
@@ -151,11 +185,11 @@ fun SignUpScreen(
                     fontSize = 20.sp,
                 )
 
-
                 OutlinedTextField(
                     value = password.value,
                     onValueChange = {password.value = it },
                     placeholder = {Text("Enter Your Password")},
+                    singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val icon = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
@@ -165,10 +199,16 @@ fun SignUpScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
+                    isError = isSubmitted && !passwordValid,
+                    supportingText = {
+                        if(isSubmitted && !passwordValid){
+                            Text("Password must contain At least one capital letter, number and special character", color = Color.Red)
+                        }
+                    }
                 )
 
 
-                Spacer(modifier = Modifier.height(25.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
                 //Shop Name TextField
                 Text(
@@ -181,19 +221,29 @@ fun SignUpScreen(
                     value = shopName.value,
                     onValueChange = {shopName.value = it },
                     placeholder = {Text("Enter Your Password")},
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = isSubmitted && !shopNameValid,
+                    supportingText = {
+                        if(isSubmitted && !shopNameValid){
+                            Text("Shop name only contain letters and spaces", color = Color.Red)
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(50.dp))
 
                 //Signup Button
                 FilledTonalButton(onClick = {
-
-                    if(name.value.isNotBlank() &&
-                        email.value.isNotBlank() &&
-                        password.value.isNotBlank() &&
-                        shopName.value.isNotBlank()
-                        ){
+                    isSubmitted = true
+                    if (!isFormEmpty){
+                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                    }
+                    else if(!isFormValid)
+                    {
+                        Toast.makeText(context, "Please enter correct details", Toast.LENGTH_SHORT).show()
+                    }
+                    else{
                         viewModel.signup(name.value, email.value, password.value, shopName.value)
                     }
                 },
