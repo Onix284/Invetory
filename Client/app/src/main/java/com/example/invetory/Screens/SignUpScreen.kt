@@ -1,5 +1,7 @@
 package com.example.invetory.Screens
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,7 +41,8 @@ import com.example.invetory.navigation.Screen
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    viewModel : AuthViewModels = viewModel()){
+    viewModel : AuthViewModels = viewModel()
+){
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -53,6 +57,23 @@ fun SignUpScreen(
 
         val signupState = viewModel.signupState
         val isLoading = viewModel.isLoading
+
+
+
+        /* -----------------------React to signup state ------------------------- */
+        LaunchedEffect(signupState) {
+            signupState?.let {
+                response ->
+                    if(response.success){
+                        navController.navigate(Screen.Login.route){
+                            popUpTo(Screen.Signup.route) {inclusive = true}
+                        }
+                    }
+
+                viewModel.clearSignupState()
+            }
+        }
+
 
         //Main Parent
         Box(modifier = Modifier
@@ -143,22 +164,35 @@ fun SignUpScreen(
                     value = shopName.value,
                     onValueChange = {shopName.value = it },
                     placeholder = {Text("Enter Your Password")},
-                    modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(50.dp))
 
                 //Signup Button
                 FilledTonalButton(onClick = {
-                    viewModel.signup(name.value, email.value, password.value, shopName.value)
-                }, enabled = !isLoading,
+
+                    if(name.value.isNotBlank() &&
+                        email.value.isNotBlank() &&
+                        password.value.isNotBlank() &&
+                        shopName.value.isNotBlank()
+                        ){
+                        viewModel.signup(name.value, email.value, password.value, shopName.value)
+                    }
+                },
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 90.dp)
                         .height(50.dp)){
                     Text(if (isLoading) "Signing up..." else "Signup", fontSize = 15.sp)
+                }
+
+                signupState?.let {
+                        if(!it.success){
+                            Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
+                            Log.d("SignupError", it.message)
+                        }
                 }
 
                 Spacer(modifier = Modifier.height(25.dp))

@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.invetory.Network.ServiceAPIs.AuthApiService
+import com.example.invetory.model.SignUpRequest
 import com.example.invetory.model.SignUpResponse
 import kotlinx.coroutines.launch
 
@@ -18,16 +19,20 @@ class AuthViewModels : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             try {
-                val response = AuthApiService.signup(name, email, password, shopName)
+                val request = SignUpRequest(name, email, password, shopName)
+                val response = AuthApiService.signup(request)
                 signupState = response
             }
             catch (e : Exception){
                 signupState = SignUpResponse(false, "Error ${e.message}")
             }
             finally {
-                isLoading = true
+                isLoading = false
             }
         }
     }
 
+    fun clearSignupState() {
+        signupState = null
+    }
 }

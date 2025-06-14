@@ -12,6 +12,6 @@ data class SignUpRequest(
 
 @Serializable
 data class SignUpResponse(
-    val Success : Boolean,
-    val Message : String
+    val success : Boolean,
+    val message : String
 )
