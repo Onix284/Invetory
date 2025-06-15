@@ -100,6 +100,7 @@ app.post('/auth/login', (req, res) => {
         
 
         res.status(200).json({
+            success : true,
             message: 'Login successful',
             user: {
                 id: user.id,

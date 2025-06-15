@@ -39,10 +39,8 @@ fun LoginScreen(navController: NavController){
         modifier = Modifier.fillMaxSize()
     ){
         //Values to pass in backend
-        val name = remember { mutableStateOf("") }
         val email = remember { mutableStateOf("") }
         val password = remember { mutableStateOf("") }
-        var shopName = remember { mutableStateOf("") }
 
         val scrollState = rememberScrollState()
         val context = LocalContext.current
@@ -110,7 +108,7 @@ fun LoginScreen(navController: NavController){
 
                 Spacer(modifier = Modifier.height(25.dp))
 
-                //Signup Button
+                //Login Button
                 FilledTonalButton(onClick = {
 
                 },

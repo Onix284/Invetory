@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dagger)
+    kotlin("kapt")
+
 }
 
 android {
@@ -66,4 +69,9 @@ dependencies {
 
     //Icons
     implementation(libs.androidx.material.icons.extended)
+
+    //Dagger Hilt
+    implementation(libs.dagger.hilt)
+    implementation(libs.hilt.compose.navigation)
+    kapt(libs.dagger.kapt)
 }

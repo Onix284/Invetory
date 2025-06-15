@@ -6,7 +6,6 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 kotlinxSerializationJson = "1.8.1"
-kotlinxSerializationJsonVersion = "1.6.3"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
 composeBom = "2025.06.00"
@@ -19,11 +18,8 @@ ktorClientCio = "2.3.4"
 ktorClientContentNegotiation = "3.1.2"
 ktorClientLogging = "3.1.2"
 ktorClientOkhttp = "3.1.3"
-ktorClientOkhttpVersion = "3.1.3"
 ktorClientPlugins = "3.1.1"
 ktorClientSerialization = "2.3.0"
-ktorClientTimeout = "3.1.3"
-ktorClientTimeoutVersion = "2.3.3"
 ktorSerializationKotlinxJson = "3.1.3"
 
 [libraries]
@@ -57,12 +53,18 @@ ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", vers
 ktor-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
 ktor-serialization-kotlinx-json-v233 = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
 
+#Hilt
+dagger-hilt = { module = "com.google.dagger:hilt-android", version = "2.56.2" }
+dagger-kapt = { module = 'com.google.dagger:hilt-android-compiler', version = "2.56.2" }
+hilt-compose-navigation = { module = "androidx.hilt:hilt-navigation-compose", version = "1.2.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+dagger = { id = "com.google.dagger.hilt.android", version = "2.56.2" }
 
 [bundles]
 ktor = [

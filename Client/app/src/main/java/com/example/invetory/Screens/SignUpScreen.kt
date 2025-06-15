@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.invetory.MyViewModels.AuthViewModels
@@ -47,7 +48,7 @@ import com.example.invetory.navigation.Screen
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    viewModel : AuthViewModels = viewModel()
+    viewModel : AuthViewModels = hiltViewModel()
 ){
     Box(
         modifier = Modifier.fillMaxSize()
@@ -142,7 +143,9 @@ fun SignUpScreen(
 
                 OutlinedTextField(
                     value = name.value,
-                    onValueChange = {name.value = it },
+                    onValueChange = {name.value = it
+                        Log.d("TXT‑DEBUG", "NAME raw → [$it]")},
+
                     placeholder = {Text("Enter Your Name")},
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,

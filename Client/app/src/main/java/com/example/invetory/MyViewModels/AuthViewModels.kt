@@ -8,9 +8,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.invetory.Network.ServiceAPIs.AuthApiService
 import com.example.invetory.model.SignUpRequest
 import com.example.invetory.model.SignUpResponse
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-class AuthViewModels : ViewModel() {
+@HiltViewModel
+class AuthViewModels @Inject constructor(
+    private val authApiService : AuthApiService
+) : ViewModel() {
 
     var signupState by mutableStateOf<SignUpResponse?>(null)
     var isLoading by mutableStateOf(false)
@@ -20,7 +25,7 @@ class AuthViewModels : ViewModel() {
             isLoading = true
             try {
                 val request = SignUpRequest(name, email, password, shopName)
-                val response = AuthApiService.signup(request)
+                val response = authApiService.signup(request)
                 signupState = response
             }
             catch (e : Exception){

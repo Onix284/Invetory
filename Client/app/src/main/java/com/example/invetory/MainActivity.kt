@@ -13,7 +13,9 @@ import com.example.invetory.Screens.LoginScreen
 import com.example.invetory.Screens.SignUpScreen
 import com.example.invetory.Screens.UserDashboardScreen
 import com.example.invetory.navigation.Screen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
