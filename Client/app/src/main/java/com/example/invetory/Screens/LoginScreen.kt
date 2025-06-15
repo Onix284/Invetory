@@ -112,6 +112,31 @@ fun LoginScreen(navController: NavController){
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
 
+                Spacer(modifier = Modifier.height(10.dp))
+
+                //Forgot Password
+                Text(
+                    text = "Forget Password",// or any style you prefer
+                    fontSize = 13.sp,
+                    color = Color.Blue,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                        .clickable( onClick =  {
+                            showDialog = true
+                        })
+                )
+
+                if(showDialog){
+                    ForgotPasswordDialog(
+                        onDismiss = {
+                            showDialog = false
+                            Toast.makeText(context, "Canceled", Toast.LENGTH_SHORT).show()},
+                        onSend = {
+                            email -> //Call ViewModel SendEmail
+                            showDialog = false
+                            Toast.makeText(context, "Check your mail", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(25.dp))
 
