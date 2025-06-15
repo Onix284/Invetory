@@ -2,12 +2,13 @@ const express = require('express');
 const db = require('../Server/config/db.js');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 //Signup API
 app.post('/auth/signup', (req, res) => {
@@ -109,9 +110,7 @@ app.post('/auth/login', (req, res) => {
                 shop_name: user.shop_name
             }
         });
-
     });
-
 });
 
 
@@ -136,3 +135,85 @@ app.listen(PORT, () => {
 
 });
 
+app.post('/auth/forgot-password', (req, res) => {
+
+    const { email } = req.body;
+
+    if(!email){
+        return res.status(400).json({
+            success : false,
+            message: 'Email is required'
+        });
+    }
+
+    const query = 'SELECT * FROM users WHERE email = ?';
+
+     db.query(query, [email], async (err, results) => {
+
+        if (err || results.length === 0) {
+            return res.status(404).json({
+                success : false,
+                message: 'User not found'
+            });
+        }
+
+        //Generate Temp Password
+        const TempPassword = generateTempPasswor();
+        const hashedPassword = await bcrypt.hash(TempPassword, 10);
+
+
+        //Update in database
+        
+        const updateQuery = 'UPDATE users SET password = ? WHERE email = ?';
+        
+        db.query(updateQuery, [hashedPassword, email], (err, result) => {
+
+            if(err){
+                res.status(500).json({
+                    success : false,
+                    message: 'Failed to update password'
+                });
+            }
+
+            //Send email with temporary password
+            sendTempPassword(email, TempPassword);
+            return res.status(200).json({
+                success : true, 
+                message : 'Temporary password sent to your email'
+            });    
+        });
+    });
+});
+
+//Generate temporary password
+function generateTempPasswor(){
+    return Math.random().toString(36).slice(-8) + "@1";
+}
+
+//Function to send email
+function sendTempPassword(email, password){
+
+    const transporter = nodemailer.createTransport({
+        service : "gmail",
+        auth : {
+            user : "omfreelancer281@gmail.com",
+            pass : "oxxn xtpf qthx hxhr"
+        }
+    });
+
+    const mailOptions = {
+        from : "omfreelancer281@gmail.com",
+        to : email,
+        subject : "Temporary Password",
+        text : `Your temporary password is: ${password}. Please change it after logging in.`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error sending email:', error);
+            return;
+        }
+        console.log('Email sent:', info.response);
+    });
+
+}
