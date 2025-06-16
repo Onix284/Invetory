@@ -64,7 +64,7 @@ fun SignUpScreen(
         val scrollState = rememberScrollState()
         val context = LocalContext.current
 
-        val signupState = viewModel.signupState
+        val signupState by viewModel.signupState
         val isLoading = viewModel.isLoading
 
         var isSubmitted by remember { mutableStateOf(false) }

@@ -179,7 +179,7 @@ app.post('/auth/forgot-password', (req, res) => {
             sendTempPassword(email, TempPassword);
             return res.status(200).json({
                 success : true, 
-                message : 'Temporary password sent to your email'
+                message : 'Check your mail'
             });    
         });
     });

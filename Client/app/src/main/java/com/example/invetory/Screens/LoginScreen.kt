@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,12 +35,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.invetory.MyViewModels.AuthViewModels
 import com.example.invetory.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController){
+fun LoginScreen(
+    navController: NavController,
+    viewModel : AuthViewModels = hiltViewModel()
+){
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -51,6 +57,21 @@ fun LoginScreen(navController: NavController){
         val context = LocalContext.current
 
         var showDialog by remember { mutableStateOf(false) }
+
+        val forgotPasswordResponse by viewModel.forgotPasswordResponse
+
+        LaunchedEffect(forgotPasswordResponse) {
+            forgotPasswordResponse?.let {
+                response ->
+                Toast.makeText(context, response.message, Toast.LENGTH_SHORT).show()
+
+                if(response.success){
+                    showDialog = false
+                }
+
+                viewModel.clearForgotPasswordResponse()
+            }
+        }
 
 
 
@@ -131,9 +152,7 @@ fun LoginScreen(navController: NavController){
                             showDialog = false
                             Toast.makeText(context, "Canceled", Toast.LENGTH_SHORT).show()},
                         onSend = {
-                            email -> //Call ViewModel SendEmail
-                            showDialog = false
-                            Toast.makeText(context, "Check your mail", Toast.LENGTH_SHORT).show()
+                            email -> viewModel.forgotPassword(email)
                         }
                     )
                 }
@@ -142,7 +161,8 @@ fun LoginScreen(navController: NavController){
 
                 //Login Button
                 FilledTonalButton(onClick = {
-                    navController.navigate(Screen.Home.route)
+                    //Enter Your Login API Logic
+                        navController.navigate(Screen.Home.route)
                 },
                     modifier = Modifier
                         .fillMaxWidth()
