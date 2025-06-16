@@ -14,9 +14,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -33,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -57,6 +63,7 @@ fun LoginScreen(
         val context = LocalContext.current
 
         var showDialog by remember { mutableStateOf(false) }
+        var passwordVisible by remember { mutableStateOf(false) }
 
         val forgotPasswordResponse by viewModel.forgotPasswordResponse
         val loginResponse by viewModel.loginResponse
@@ -127,7 +134,8 @@ fun LoginScreen(
                     value = email.value,
                     onValueChange = {email.value = it },
                     placeholder = {Text("Enter Your Email")},
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
 
                 Spacer(modifier = Modifier.height(25.dp))
@@ -144,8 +152,17 @@ fun LoginScreen(
                     onValueChange = {password.value = it },
                     placeholder = {Text("Enter Your Password")},
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+
+                        val icon = if(passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
+
+                        IconButton(onClick = {
+                            passwordVisible = !passwordVisible
+                        }) {
+                            Icon(imageVector = icon, contentDescription = null)
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
