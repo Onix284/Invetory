@@ -13,6 +13,7 @@ import com.example.invetory.model.LoginRequest
 import com.example.invetory.model.LoginResponse
 import com.example.invetory.model.SignUpRequest
 import com.example.invetory.model.SignUpResponse
+import com.example.invetory.model.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -32,6 +33,9 @@ class AuthViewModels @Inject constructor(
 
     private var _loginResponse = mutableStateOf<LoginResponse?>(null)
     val loginResponse : State<LoginResponse?> = _loginResponse
+
+    private val _loggedInUser = mutableStateOf<UserData?>(null)
+    val loggedInUser: State<UserData?> = _loggedInUser
 
     fun signup(name : String, email : String, password : String, shopName : String){
         viewModelScope.launch {
@@ -88,6 +92,10 @@ class AuthViewModels @Inject constructor(
 
     fun clearLoginResponse(){
         _loginResponse.value = null
+    }
+
+    fun setLoggedInUser(user : UserData?){
+        _loggedInUser.value = user
     }
 
 }
