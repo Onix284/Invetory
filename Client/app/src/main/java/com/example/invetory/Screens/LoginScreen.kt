@@ -59,6 +59,8 @@ fun LoginScreen(
         var showDialog by remember { mutableStateOf(false) }
 
         val forgotPasswordResponse by viewModel.forgotPasswordResponse
+        val loginResponse by viewModel.loginResponse
+
 
         LaunchedEffect(forgotPasswordResponse) {
             forgotPasswordResponse?.let {
@@ -70,6 +72,19 @@ fun LoginScreen(
                 }
 
                 viewModel.clearForgotPasswordResponse()
+            }
+        }
+
+        LaunchedEffect(loginResponse) {
+            loginResponse?.let {
+                response ->
+                if(response.success){
+                    navController.navigate(Screen.Home.route)
+                }else{
+                    Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
+                }
+
+                viewModel.clearLoginResponse()
             }
         }
 
@@ -161,8 +176,7 @@ fun LoginScreen(
 
                 //Login Button
                 FilledTonalButton(onClick = {
-                    //Enter Your Login API Logic
-                        navController.navigate(Screen.Home.route)
+                    viewModel.login(email.value, password.value)
                 },
                     modifier = Modifier
                         .fillMaxWidth()

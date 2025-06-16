@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.invetory.Network.ServiceAPIs.AuthApiService
 import com.example.invetory.model.ForgotPasswordRequest
 import com.example.invetory.model.ForgotPasswordResponse
+import com.example.invetory.model.LoginRequest
+import com.example.invetory.model.LoginResponse
 import com.example.invetory.model.SignUpRequest
 import com.example.invetory.model.SignUpResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +29,9 @@ class AuthViewModels @Inject constructor(
 
     private var _forgotPasswordResponse = mutableStateOf<ForgotPasswordResponse?>(null)
     val forgotPasswordResponse : State<ForgotPasswordResponse?> = _forgotPasswordResponse
+
+    private var _loginResponse = mutableStateOf<LoginResponse?>(null)
+    val loginResponse : State<LoginResponse?> = _loginResponse
 
     fun signup(name : String, email : String, password : String, shopName : String){
         viewModelScope.launch {
@@ -66,4 +71,23 @@ class AuthViewModels @Inject constructor(
     fun clearForgotPasswordResponse(){
         _forgotPasswordResponse.value = null
     }
+
+
+    fun login(email : String, password : String){
+        viewModelScope.launch {
+            try {
+                val request = LoginRequest(email, password)
+                val response = authApiService.login(request)
+                _loginResponse.value = response
+            }
+            catch (e : Exception){
+                _loginResponse.value = LoginResponse(false, "Error ${e.message}")
+            }
+        }
+    }
+
+    fun clearLoginResponse(){
+        _loginResponse.value = null
+    }
+
 }
