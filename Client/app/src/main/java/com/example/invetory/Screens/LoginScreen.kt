@@ -85,9 +85,8 @@ fun LoginScreen(
             loginResponse?.let {
                 response ->
                 if(response.success){
-                    viewModel.setLoggedInUser(user = response.user)
                     navController.navigate(Screen.Home.route)
-                    Log.d("LoginResponse", "LoginScreen: ${viewModel.loggedInUser.value?.name}")
+                    Log.d("LoginResponse", "LoginScreen: ${viewModel.loggedInUser.value}")
                 }else{
                     Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
                 }

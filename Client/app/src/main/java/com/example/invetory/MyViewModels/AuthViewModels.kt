@@ -83,6 +83,10 @@ class AuthViewModels @Inject constructor(
                 val request = LoginRequest(email, password)
                 val response = authApiService.login(request)
                 _loginResponse.value = response
+
+                if(response.success){
+                    _loggedInUser.value = response.user
+                }
             }
             catch (e : Exception){
                 _loginResponse.value = LoginResponse(false, "Error ${e.message}")
@@ -92,10 +96,6 @@ class AuthViewModels @Inject constructor(
 
     fun clearLoginResponse(){
         _loginResponse.value = null
-    }
-
-    fun setLoggedInUser(user : UserData?){
-        _loggedInUser.value = user
     }
 
 }
