@@ -11,10 +11,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.invetory.MyViewModels.AuthViewModels
 
 @Composable
-fun UserDashboardScreen(
-    viewModels: AuthViewModels = hiltViewModel()
-){
-    val userName = viewModels.loggedInUser.value
+fun UserDashboardScreen(authViewModel: AuthViewModels){
+    val userName = authViewModel.loggedInUser.value
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -42,8 +43,12 @@ fun InvetoryNavHost(navController : NavHostController){
         composable(Screen.Login.route) {
             LoginScreen(navController)
         }
-        composable(Screen.Home.route) {
-            UserDashboardScreen()
+        composable(Screen.Home.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry){
+                navController.getBackStackEntry(Screen.Login.route)
+            }
+            val authViewModel = hiltViewModel<AuthViewModels>(parentEntry)
+            UserDashboardScreen(authViewModel)
         }
     }
 }
