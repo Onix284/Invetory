@@ -74,4 +74,7 @@ dependencies {
     implementation(libs.dagger.hilt)
     implementation(libs.hilt.compose.navigation)
     kapt(libs.dagger.kapt)
+
+    //Datastore
+    implementation(libs.androidx.datastore.preferences)
 }

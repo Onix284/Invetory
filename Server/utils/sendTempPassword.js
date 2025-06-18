@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 
 //Function to send email
-function sendTempPassword(email, password){
+module.exports = function sendTempPassword(email, password){
 
     const transporter = nodemailer.createTransport({
         service : "gmail",

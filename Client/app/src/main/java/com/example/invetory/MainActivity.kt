@@ -1,11 +1,14 @@
 package com.example.invetory
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -17,14 +20,21 @@ import com.example.invetory.Screens.SignUpScreen
 import com.example.invetory.Screens.UserDashboardScreen
 import com.example.invetory.navigation.Screen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
+            val authViewModel : AuthViewModels = hiltViewModel()
+            val context = LocalContext.current
+
+            val user = authViewModel.loggedInUser.value
+
             InvetoryNavHost(navController = navController)
         }
     }

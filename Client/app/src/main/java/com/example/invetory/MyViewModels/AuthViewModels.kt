@@ -1,12 +1,16 @@
 package com.example.invetory.MyViewModels
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.invetory.Network.ServiceAPIs.AuthApiService
+import com.example.invetory.UserCredentialsStore
 import com.example.invetory.model.ForgotPasswordRequest
 import com.example.invetory.model.ForgotPasswordResponse
 import com.example.invetory.model.LoginRequest
@@ -23,6 +27,7 @@ class AuthViewModels @Inject constructor(
     private val authApiService : AuthApiService
 ) : ViewModel() {
 
+
     private var _signupState = mutableStateOf<SignUpResponse?>(null)
     val signupState: State<SignUpResponse?> = _signupState
 
@@ -36,6 +41,7 @@ class AuthViewModels @Inject constructor(
 
     private val _loggedInUser = mutableStateOf<UserData?>(null)
     val loggedInUser: State<UserData?> = _loggedInUser
+
 
     fun signup(name : String, email : String, password : String, shopName : String){
         viewModelScope.launch {
@@ -77,7 +83,7 @@ class AuthViewModels @Inject constructor(
     }
 
 
-    fun login(email : String, password : String){
+    fun login(email : String, password : String, context: Context){
         viewModelScope.launch {
             try {
                 val request = LoginRequest(email, password)
@@ -86,6 +92,9 @@ class AuthViewModels @Inject constructor(
 
                 if(response.success){
                     _loggedInUser.value = response.user
+
+                    //Save Credentials To Datastore
+                    UserCredentialsStore.saveCredentials(context, email, password)
                 }
             }
             catch (e : Exception){
@@ -98,4 +107,17 @@ class AuthViewModels @Inject constructor(
         _loginResponse.value = null
     }
 
+    fun autoLogin(context: Context){
+
+        viewModelScope.launch {
+            val savedEmail = UserCredentialsStore.useEmail(context)
+            val savedPassword = UserCredentialsStore.getPassword(context)
+
+            if (!savedEmail.isNullOrEmpty() && !savedPassword.isNullOrEmpty()) {
+                login(savedEmail, savedPassword, context)
+
+                Log.d("AutoLogin", "Trying auto login with $savedEmail")
+            }
+        }
+    }
 }

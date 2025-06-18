@@ -194,7 +194,7 @@ fun LoginScreen(
 
                 //Login Button
                 FilledTonalButton(onClick = {
-                    viewModel.login(email.value, password.value)
+                    viewModel.login(email.value, password.value, context)
                 },
                     modifier = Modifier
                         .fillMaxWidth()
