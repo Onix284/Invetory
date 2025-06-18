@@ -27,7 +27,6 @@ class AuthViewModels @Inject constructor(
     private val authApiService : AuthApiService
 ) : ViewModel() {
 
-
     private var _signupState = mutableStateOf<SignUpResponse?>(null)
     val signupState: State<SignUpResponse?> = _signupState
 
@@ -115,9 +114,10 @@ class AuthViewModels @Inject constructor(
 
             if (!savedEmail.isNullOrEmpty() && !savedPassword.isNullOrEmpty()) {
                 login(savedEmail, savedPassword, context)
-
-                Log.d("AutoLogin", "Trying auto login with $savedEmail")
+                Log.d("AutoLogin ViewModel", "Trying auto login with $savedEmail")
             }
         }
     }
+
+
 }

@@ -18,6 +18,6 @@ fun UserDashboardScreen(authViewModel: AuthViewModels){
         contentAlignment = Alignment.Center
     ){
         Text(text = "Hey ${userName?.name}")
-        Log.d("LoginResponse", "userDashboard: $userName")
+        Log.d("AutoLogin User Dashboard", "userDashboard: ${userName?.email}")
     }
 }

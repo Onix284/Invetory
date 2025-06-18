@@ -14,6 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun TestScreen(){
     Box(modifier = Modifier.fillMaxSize().background(color = Color.White)){
-        Text(text = "Home Screen Test", modifier = Modifier.align(Alignment.Center))
+        //Text(text = "Loading...", modifier = Modifier.align(Alignment.Center))
     }
 }
