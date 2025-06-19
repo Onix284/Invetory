@@ -72,7 +72,6 @@ fun LoginScreen(
             forgotPasswordResponse?.let {
                 response ->
                 Toast.makeText(context, response.message, Toast.LENGTH_SHORT).show()
-
                 if(response.success){
                     showDialog = false
                 }
@@ -86,7 +85,7 @@ fun LoginScreen(
                 response ->
                 if(response.success){
                     navController.navigate(Screen.Home.route)
-                    Log.d("LoginResponse", "LoginScreen: ${viewModel.loggedInUser.value}")
+                    Log.d("AutoLogin", "LoginScreen: ${viewModel.loggedInUser.value}")
                 }else{
                     Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
                 }
@@ -94,8 +93,6 @@ fun LoginScreen(
                 viewModel.clearLoginResponse()
             }
         }
-
-
 
         //Main Parent
         Box(modifier = Modifier

@@ -19,6 +19,9 @@ import com.example.invetory.model.SignUpRequest
 import com.example.invetory.model.SignUpResponse
 import com.example.invetory.model.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
@@ -38,9 +41,8 @@ class AuthViewModels @Inject constructor(
     private var _loginResponse = mutableStateOf<LoginResponse?>(null)
     val loginResponse : State<LoginResponse?> = _loginResponse
 
-    private val _loggedInUser = mutableStateOf<UserData?>(null)
-    val loggedInUser: State<UserData?> = _loggedInUser
-
+    private val _loggedInUser = MutableStateFlow<UserData?>(null)
+    val loggedInUser: StateFlow<UserData?> = _loggedInUser
 
     fun signup(name : String, email : String, password : String, shopName : String){
         viewModelScope.launch {
@@ -90,10 +92,18 @@ class AuthViewModels @Inject constructor(
                 _loginResponse.value = response
 
                 if(response.success){
+
                     _loggedInUser.value = response.user
 
                     //Save Credentials To Datastore
-                    UserCredentialsStore.saveCredentials(context, email, password)
+                    response.user?.let {
+                        UserCredentialsStore.saveCredentials(
+                            context,
+                            response.user.id,
+                            email,
+                            password
+                        )
+                    }
                 }
             }
             catch (e : Exception){
@@ -105,19 +115,4 @@ class AuthViewModels @Inject constructor(
     fun clearLoginResponse(){
         _loginResponse.value = null
     }
-
-    fun autoLogin(context: Context){
-
-        viewModelScope.launch {
-            val savedEmail = UserCredentialsStore.useEmail(context)
-            val savedPassword = UserCredentialsStore.getPassword(context)
-
-            if (!savedEmail.isNullOrEmpty() && !savedPassword.isNullOrEmpty()) {
-                login(savedEmail, savedPassword, context)
-                Log.d("AutoLogin ViewModel", "Trying auto login with $savedEmail")
-            }
-        }
-    }
-
-
 }
