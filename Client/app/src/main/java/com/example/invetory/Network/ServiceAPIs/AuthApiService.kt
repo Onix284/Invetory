@@ -18,7 +18,7 @@ class AuthApiService @Inject constructor(
     private val client: HttpClient
 ){
 
-    private val baseUrl = "http://10.0.2.2:3000"
+    private val baseUrl = "http://192.168.196.129:3000"
 
     suspend fun signup(request: SignUpRequest) : SignUpResponse {
         return client.post("$baseUrl/auth/signup"){
