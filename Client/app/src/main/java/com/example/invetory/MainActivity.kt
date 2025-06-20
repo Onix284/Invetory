@@ -46,6 +46,13 @@ class MainActivity : ComponentActivity() {
 
                 if (!email.isNullOrBlank() && !password.isNullOrBlank()) {
                     authViewModel.login(email, password, context)
+
+                    authViewModel.loggedInUser.collect {
+                        if(it != null){
+                            startDestination = Screen.Home.route
+                            return@collect
+                        }
+                    }
                 } else {
                     startDestination = Screen.Signup.route
                 }

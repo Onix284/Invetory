@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +67,7 @@ fun LoginScreen(
 
         val forgotPasswordResponse by viewModel.forgotPasswordResponse
         val loginResponse by viewModel.loginResponse
+        val user by viewModel.loggedInUser.collectAsState()
 
 
         LaunchedEffect(forgotPasswordResponse) {
@@ -83,13 +85,15 @@ fun LoginScreen(
         LaunchedEffect(loginResponse) {
             loginResponse?.let {
                 response ->
-                if(response.success){
-                    navController.navigate(Screen.Home.route)
+                if(response.success && viewModel.loggedInUser.value != null){
+                        navController.navigate(Screen.Home.route){
+                            popUpTo(Screen.Login.route) {inclusive = true}
+                            launchSingleTop = true
+                        }
                     Log.d("AutoLogin", "LoginScreen: ${viewModel.loggedInUser.value}")
                 }else{
                     Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
                 }
-
                 viewModel.clearLoginResponse()
             }
         }

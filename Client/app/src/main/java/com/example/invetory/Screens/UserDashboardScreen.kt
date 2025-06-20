@@ -2,6 +2,7 @@ package com.example.invetory.Screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +19,10 @@ fun UserDashboardScreen(authViewModel: AuthViewModels){
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ){
-        Text(text = "Hey ${user?.name}")
+        Column {
+            Text(text = "Hey ${user?.name}")
+            Text(text = "Hey ${user?.id}")
+        }
         Log.d("AutoLogin User Dashboard", "userDashboard: ${user?.email}")
     }
 }
