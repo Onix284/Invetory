@@ -68,23 +68,21 @@ exports.addProduct = (req, res) => {
         type,
         company,
         model_name,
-        serial_number,
         months_of_warranty,
         purchase_date,
-        quantity,
         price
     } = req.body;
 
-    if(!user_id || !type || !company || !model_name || !serial_number || !months_of_warranty || !purchase_date || !quantity || !price){
+    if(!user_id || !type || !company || !model_name  || !months_of_warranty || !purchase_date || !price){
         return res.status(400).json({
             success: false,
             message: 'All fields are required'
         });
     }
 
-    const query = 'INSERT INTO products (user_id, type, company, model_name, serial_number, months_of_warranty, purchase_date, quantity, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const query = 'INSERT INTO products (user_id, type, company, model_name,  months_of_warranty, purchase_date, price) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
-    const values = [user_id, type, company, model_name, serial_number, months_of_warranty, purchase_date, quantity, price];
+    const values = [user_id, type, company, model_name, months_of_warranty, purchase_date, price];
 
     db.query(query, values, (err, results) => {
 
@@ -92,7 +90,7 @@ exports.addProduct = (req, res) => {
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(409).json({ 
                     success: false,
-                    message: 'Serial number already exists.'
+                    message: 'Duplicate entry. Check model name or product combination.'
                  });
             }
             return res.status(500).json({
@@ -110,20 +108,108 @@ exports.addProduct = (req, res) => {
                 type,
                 company,
                 model_name,
-                serial_number,
                 months_of_warranty,
                 purchase_date,
-                quantity,
                 price
             }
         });
     });
 };
 
-// Update product by ID
-exports.updateProductById = (req, res) => {
+// Update existing product
+exports.updateProduct = (req, res) => {
+    const {
+        product_id,
+        type,
+        company,
+        model_name,
+        months_of_warranty,
+        purchase_date,
+        price
+    } = req.body;
 
-    
+    if (!product_id || !type || !company || !model_name || !months_of_warranty || !purchase_date || !price) {
+        return res.status(400).json({
+            success: false,
+            message: "All fields are required",
+        });
+    }
 
+    const query = `
+        UPDATE products SET 
+            type = ?, 
+            company = ?, 
+            model_name = ?, 
+            months_of_warranty = ?, 
+            purchase_date = ?, 
+            price = ?
+        WHERE id = ?
+    `;
+
+    const values = [
+        type,
+        company,
+        model_name,
+        months_of_warranty,
+        purchase_date,
+        price,
+        product_id
+    ];
+
+    db.query(query, values, (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+        });
+    });
 };
 
+
+// Delete product by ID
+exports.deleteProduct = (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "Product ID is required",
+        });
+    }
+
+    const query = "DELETE FROM products WHERE id = ?";
+
+    db.query(query, [id], (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Product deleted successfully",
+        });
+    });
+};

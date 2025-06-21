@@ -4,6 +4,7 @@ const app = express();
 const authRoutes = require('./routes/authRoutes.js');
 const userRoutes = require('./routes/userRoutes.js');
 const productRoutes = require('./routes/productRoutes.js');
+const productUnitsRoutes = require('./routes/productUnitsRoutes.js');
 
 app.use(express.json());
 app.use(cors());
@@ -11,6 +12,7 @@ app.use(cors());
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/product', productRoutes);
+app.use('/productUnits', productUnitsRoutes);
 
 app.get('/', (req, res) => {
     res.send("Server is running!");
