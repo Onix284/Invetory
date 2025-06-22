@@ -2,6 +2,7 @@ package com.example.invetory.DI
 
 import com.example.invetory.Network.KtorClient
 import com.example.invetory.Network.ServiceAPIs.AuthApiService
+import com.example.invetory.Network.ServiceAPIs.DashboardApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,5 +22,11 @@ object Module {
     @Singleton
     fun provideAuthApiService(client: HttpClient) : AuthApiService{
         return AuthApiService(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDashboardApiService(client: HttpClient) : DashboardApiService{
+        return DashboardApiService(client)
     }
 }

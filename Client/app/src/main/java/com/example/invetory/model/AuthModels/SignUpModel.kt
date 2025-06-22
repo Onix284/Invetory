@@ -1,4 +1,4 @@
-package com.example.invetory.model
+package com.example.invetory.model.AuthModels
 
 import kotlinx.serialization.Serializable
 

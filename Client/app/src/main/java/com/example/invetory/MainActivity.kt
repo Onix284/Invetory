@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.invetory.MyViewModels.AuthViewModels
+import com.example.invetory.MyViewModels.DashBoardViewModel
 import com.example.invetory.Screens.LoginScreen
 import com.example.invetory.Screens.SignUpScreen
 import com.example.invetory.Screens.UserDashboardScreen
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val authViewModel : AuthViewModels = hiltViewModel()
+            val dashBoardViewModel : DashBoardViewModel = hiltViewModel()
             val context = LocalContext.current
 
             var startDestination by remember { mutableStateOf<String?>(null) }
@@ -45,13 +47,6 @@ class MainActivity : ComponentActivity() {
 
                 if (!email.isNullOrBlank() && !password.isNullOrBlank()) {
                     authViewModel.login(email, password, context)
-
-                    authViewModel.loggedInUser.collect {
-                        if(it != null){
-                            startDestination = Screen.Home.route
-                            return@collect
-                        }
-                    }
                 } else {
                     startDestination = Screen.Signup.route
                 }
@@ -67,7 +62,7 @@ class MainActivity : ComponentActivity() {
             }
 
             startDestination?.let { route ->
-                InvetoryNavHost(navController, route, authViewModel)
+                InvetoryNavHost(navController, route, authViewModel, dashBoardViewModel)
             }
         }
     }
@@ -76,7 +71,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun InvetoryNavHost(navController : NavHostController,
                     startDestination : String,
-                    authViewModel: AuthViewModels){
+                    authViewModel: AuthViewModels,
+                    dashBoardViewModel: DashBoardViewModel){
 
     NavHost(
         navController = navController,
@@ -89,7 +85,7 @@ fun InvetoryNavHost(navController : NavHostController,
             LoginScreen(navController, authViewModel)
         }
         composable(Screen.Home.route) {
-            UserDashboardScreen(authViewModel)
+            UserDashboardScreen(authViewModel, dashBoardViewModel)
         }
     }
 }
