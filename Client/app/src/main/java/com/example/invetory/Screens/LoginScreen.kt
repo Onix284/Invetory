@@ -50,7 +50,7 @@ import com.example.invetory.navigation.Screen
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel : AuthViewModels = hiltViewModel()
+    viewModel : AuthViewModels
 ){
     Box(
         modifier = Modifier.fillMaxSize()
@@ -66,9 +66,18 @@ fun LoginScreen(
         var passwordVisible by remember { mutableStateOf(false) }
 
         val forgotPasswordResponse by viewModel.forgotPasswordResponse
-        val loginResponse by viewModel.loginResponse
+        val loginResponse by viewModel.loginResponse.collectAsState()
         val user by viewModel.loggedInUser.collectAsState()
 
+
+        LaunchedEffect(user) {
+            user?.let {
+                Log.d("LoginScreen", "Login successful, navigating to Home with user: ${it.email}")
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true } // Optional: Prevent going back to Login
+                }
+            }
+        }
 
         LaunchedEffect(forgotPasswordResponse) {
             forgotPasswordResponse?.let {
@@ -82,21 +91,6 @@ fun LoginScreen(
             }
         }
 
-        LaunchedEffect(loginResponse) {
-            loginResponse?.let {
-                response ->
-                if(response.success && viewModel.loggedInUser.value != null){
-                        navController.navigate(Screen.Home.route){
-                            popUpTo(Screen.Login.route) {inclusive = true}
-                            launchSingleTop = true
-                        }
-                    Log.d("AutoLogin", "LoginScreen: ${viewModel.loggedInUser.value}")
-                }else{
-                    Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
-                }
-                viewModel.clearLoginResponse()
-            }
-        }
 
         //Main Parent
         Box(modifier = Modifier
@@ -203,6 +197,8 @@ fun LoginScreen(
                         .height(50.dp)){
                     Text("Login", fontSize = 15.sp)
                 }
+
+
 
                 Spacer(modifier = Modifier.height(25.dp))
 

@@ -1,6 +1,7 @@
 package com.example.invetory.MyViewModels
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +36,8 @@ class AuthViewModels @Inject constructor(
     private var _forgotPasswordResponse = mutableStateOf<ForgotPasswordResponse?>(null)
     val forgotPasswordResponse : State<ForgotPasswordResponse?> = _forgotPasswordResponse
 
-    private var _loginResponse = mutableStateOf<LoginResponse?>(null)
-    val loginResponse : State<LoginResponse?> = _loginResponse
+    private var _loginResponse = MutableStateFlow<LoginResponse?>(null)
+    val loginResponse : StateFlow<LoginResponse?> = _loginResponse
 
     private val _loggedInUser = MutableStateFlow<UserData?>(null)
     val loggedInUser: StateFlow<UserData?> = _loggedInUser
@@ -62,7 +63,6 @@ class AuthViewModels @Inject constructor(
         _signupState.value = null
     }
 
-
     fun forgotPassword(email: String){
         viewModelScope.launch {
             try {
@@ -87,9 +87,7 @@ class AuthViewModels @Inject constructor(
                 val request = LoginRequest(email, password)
                 val response = authApiService.login(request)
                 _loginResponse.value = response
-
-                if(response.success){
-                    _loggedInUser.value = response.user
+                Log.d("LoginResponse", "login: ${loginResponse.value}")
 
                     //Save Credentials To Datastore
                     response.user?.let {
@@ -100,6 +98,10 @@ class AuthViewModels @Inject constructor(
                             password
                         )
                     }
+
+                if(response.success){
+                    _loggedInUser.value = response.user
+                    Log.d("LoginResponse", "user: ${loggedInUser.value}")
                 }
             }
             catch (e : Exception){

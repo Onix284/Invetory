@@ -21,7 +21,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.invetory.MyViewModels.AuthViewModels
 import com.example.invetory.Screens.LoginScreen
 import com.example.invetory.Screens.SignUpScreen
-import com.example.invetory.Screens.TestScreen
 import com.example.invetory.Screens.UserDashboardScreen
 import com.example.invetory.navigation.Screen
 import dagger.hilt.android.AndroidEntryPoint
@@ -83,14 +82,11 @@ fun InvetoryNavHost(navController : NavHostController,
         navController = navController,
         startDestination = startDestination
     ){
-        composable(Screen.Splash.route){
-            TestScreen()
-        }
         composable(Screen.Signup.route) {
             SignUpScreen(navController)
         }
         composable(Screen.Login.route) {
-            LoginScreen(navController)
+            LoginScreen(navController, authViewModel)
         }
         composable(Screen.Home.route) {
             UserDashboardScreen(authViewModel)
