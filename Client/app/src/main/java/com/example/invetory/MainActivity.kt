@@ -85,7 +85,7 @@ fun InvetoryNavHost(navController : NavHostController,
             LoginScreen(navController, authViewModel)
         }
         composable(Screen.Home.route) {
-            UserDashboardScreen(authViewModel, dashBoardViewModel)
+            UserDashboardScreen(authViewModel, dashBoardViewModel, navController)
         }
     }
 }

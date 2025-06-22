@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.invetory.Network.ServiceAPIs.DashboardApiService
+import com.example.invetory.model.DashBoardModel.AddProductRequest
 import com.example.invetory.model.DashBoardModel.ProductData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,27 @@ class DashBoardViewModel @Inject constructor(
             catch (e : Exception){
                 Log.e("DashboardVM", "Error fetching products: ${e.message}")
                 _error.value = e.message ?: "Unknown error"
+            }
+            finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun addNewProduct(productRequest: AddProductRequest){
+        _isLoading.value = true
+        _error.value = null
+
+        viewModelScope.launch {
+            try {
+                val response = dashboardApiService.addNewProduct(productRequest)
+
+                if(response.success){
+                    fetchAllProducts(productRequest.user_id)
+                }
+            }
+            catch (e : Exception){
+                _error.value = e.message
             }
             finally {
                 _isLoading.value = false

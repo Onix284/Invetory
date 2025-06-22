@@ -2,6 +2,7 @@ package com.example.invetory.model.DashBoardModel
 
 import kotlinx.serialization.Serializable
 
+//Get All Product List
 @Serializable
 data class AllProductsListResponse(
     val success : Boolean,
@@ -18,4 +19,23 @@ data class ProductData(
     val months_of_warranty : Int,
     val purchase_date : String,
     val price : String
+)
+
+//Add New Product
+@Serializable
+data class AddProductRequest(
+    val user_id : Int,
+    val type : String,
+    val company : String,
+    val model_name : String,
+    val months_of_warranty : Int,
+    val purchase_date : String,
+    val price : Double
+)
+
+@Serializable
+data class AddProductResponse(
+    val success: Boolean,
+    val message: String,
+    val product : ProductData? = null
 )
