@@ -54,9 +54,8 @@ exports.getProductById = (req, res) => {
 };
 
 
-//Add new product
+// Add new product
 exports.addProduct = (req, res) => {
-
     const {
         user_id,
         type,
@@ -64,32 +63,30 @@ exports.addProduct = (req, res) => {
         model_name,
         months_of_warranty,
         purchase_date,
-        price
+        price,
+        quantity
     } = req.body;
 
-    if(!user_id || !type || !company || !model_name  || !months_of_warranty || !purchase_date || !price){
+    if (!user_id || !type || !company || !model_name || !months_of_warranty || !purchase_date || !price || !quantity) {
         return res.status(400).json({
             success: false,
             message: 'All fields are required'
         });
     }
 
-    const query = 'INSERT INTO products (user_id, type, company, model_name,  months_of_warranty, purchase_date, price) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    const query = `
+        INSERT INTO products (user_id, type, company, model_name, months_of_warranty, purchase_date, price, quantity)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
 
-    const values = [user_id, type, company, model_name, months_of_warranty, purchase_date, price];
+    const values = [user_id, type, company, model_name, months_of_warranty, purchase_date, price, quantity];
 
-    db.query(query, values, (err, results) => {
-
-        if(err){
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(409).json({ 
-                    success: false,
-                    message: 'Duplicate entry. Check model name or product combination.'
-                 });
-            }
+    db.query(query, values, (err, result) => {
+        if (err) {
             return res.status(500).json({
                 success: false,
-                message: 'Internal server error'
+                message: 'Error inserting product',
+                error: err
             });
         }
 
@@ -97,18 +94,20 @@ exports.addProduct = (req, res) => {
             success: true,
             message: 'Product added successfully',
             product: {
-                id: results.insertId,
+                id: result.insertId,
                 user_id,
                 type,
                 company,
                 model_name,
                 months_of_warranty,
                 purchase_date,
-                price
+                price,
+                quantity
             }
         });
     });
 };
+
 
 // Update existing product
 exports.updateProduct = (req, res) => {

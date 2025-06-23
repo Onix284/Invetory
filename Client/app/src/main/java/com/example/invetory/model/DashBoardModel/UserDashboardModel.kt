@@ -10,7 +10,7 @@ data class AllProductsListResponse(
 )
 
 @Serializable
-data class ProductData(
+data class  ProductData(
     val id : Int,
     val user_id : Int,
     val type : String,
@@ -18,7 +18,8 @@ data class ProductData(
     val model_name : String,
     val months_of_warranty : Int,
     val purchase_date : String,
-    val price : String
+    val price : String,
+    val quantity: Int
 )
 
 //Add New Product
@@ -30,31 +31,14 @@ data class AddProductRequest(
     val model_name : String,
     val months_of_warranty : Int,
     val purchase_date : String,
-    val price : Double
+    val price : Double,
+    val quantity : Int
 )
 
 @Serializable
 data class AddProductResponse(
     val success: Boolean,
     val message: String,
-    val product : ProductData? = null
+    val product : ProductData? = null,
 )
 
-
-@Serializable
-data class AddProductUnitRequest(
-    val product_id : Int,
-    val serial_number : List<String>
-)
-
-@Serializable
-data class AddProductUnitResponse(
-    val success: Boolean,
-    val message: String,
-    val inserted : List<Serials>? = null
-)
-
-@Serializable
-data class Serials(
-    val serialNumber : String
-)
