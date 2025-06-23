@@ -2,6 +2,7 @@ package com.example.invetory.Screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +23,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -63,6 +63,8 @@ import com.example.invetory.model.DashBoardModel.ProductData
 import com.example.invetory.navigation.Screen
 import com.example.invetory.ui.theme.fontFamily
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
@@ -155,14 +157,16 @@ fun UserDashboardScreen(
                     // Header
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Box(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .padding(vertical = 20.dp, horizontal = 5.dp)
                         ) {
                             //Menu icon
                             Icon(
                                 imageVector = Icons.Default.Menu,
                                 contentDescription = null,
-                                modifier = Modifier.align(alignment = Alignment.TopStart)
+                                modifier = Modifier
+                                    .align(alignment = Alignment.TopStart)
                                     .padding(top = 20.dp)
                                     .padding(start = 10.dp)
                                     .size(35.dp)
@@ -177,14 +181,16 @@ fun UserDashboardScreen(
                                     text = "Welcome",
                                     fontSize = 20.sp,
                                     fontFamily = fontFamily,
-                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                                    modifier = Modifier
+                                        .align(alignment = Alignment.CenterHorizontally)
                                         .padding(top = 20.dp)
                                 )
                                 Text(
                                     text = user.shop_name,
                                     fontSize = 20.sp,
                                     fontFamily = fontFamily,
-                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                                    modifier = Modifier
+                                        .align(alignment = Alignment.CenterHorizontally)
                                         .padding(top = 10.dp)
                                 )
                             }
@@ -206,7 +212,10 @@ fun UserDashboardScreen(
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (selectedCategory == category) Color.Blue else Color.Transparent
                             ),
-                            modifier = Modifier.fillMaxWidth().weight(0.5f).padding(5.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.5f)
+                                .padding(5.dp)
                                 .shadow(2.dp),
                             shape = RoundedCornerShape(5.dp)
                         ) {
@@ -222,7 +231,7 @@ fun UserDashboardScreen(
 
                 //handle state
                 when {
-                    //if loading
+                        //if loading
                     isLoading -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
@@ -347,7 +356,7 @@ fun ProductCard(productData: ProductData) {
                         fontSize = 17.sp,
                         modifier = Modifier
                             .align(alignment = Alignment.End)
-                            .padding(10.dp)
+                            .padding(5.dp)
                     )
                     Text(
                         text = productData.price + "₹",
@@ -416,34 +425,42 @@ fun AddProductForm(
         },
         confirmButton = {
             Button(onClick = {
-                val request = AddProductRequest(
-                    user_id = user_id,
-                    type = type,
-                    company = company.trim(),
-                    model_name = modelName.trim(),
-                    months_of_warranty = warranty.toIntOrNull() ?: 0,
-                    purchase_date = purchaseDate.trim(),
-                    price = price.toDoubleOrNull() ?: 0.0
-                )
 
-                if (!companyRegex.matches(company.trim())) {
-                    Toast.makeText(context, "Invalid company name", Toast.LENGTH_SHORT).show(); return@Button
-                }
-                if (!modelRegex.matches(modelName.trim())) {
-                    Toast.makeText(context, "Invalid model name", Toast.LENGTH_SHORT).show(); return@Button
-                }
-                if (!warrantyRegex.matches(warranty.trim())) {
-                    Toast.makeText(context, "Enter valid warranty in months", Toast.LENGTH_SHORT).show(); return@Button
-                }
-                if (!priceRegex.matches(price.trim())) {
-                    Toast.makeText(context, "Enter valid price", Toast.LENGTH_SHORT).show(); return@Button
-                }
-                if (!dateRegex.matches(purchaseDate.trim())) {
-                    Toast.makeText(context, "Enter date in YYYY/MM/DD format", Toast.LENGTH_SHORT).show(); return@Button
-                }
+                val trimmedCompany = company.trim()
+                val trimmedModel = modelName.trim()
+                val trimmedWarranty = warranty.trim()
+                val trimmedDate = purchaseDate.trim()
+                val trimmedPrice = price.trim()
 
-                onAddProduct(request)
-                onDismiss()
+                if(!isValidDate(trimmedDate)){
+                    Toast.makeText(context, "Enter valid date", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                when {
+                    !companyRegex.matches(trimmedCompany) ->
+                        Toast.makeText(context, "Invalid company name", Toast.LENGTH_SHORT).show()
+                    !modelRegex.matches(trimmedModel) ->
+                        Toast.makeText(context, "Invalid model name", Toast.LENGTH_SHORT).show()
+                    !warrantyRegex.matches(trimmedWarranty) ->
+                        Toast.makeText(context, "Enter valid warranty in months", Toast.LENGTH_SHORT).show()
+                    !priceRegex.matches(trimmedPrice) ->
+                        Toast.makeText(context, "Enter valid price", Toast.LENGTH_SHORT).show()
+                    !dateRegex.matches(trimmedDate) ->
+                        Toast.makeText(context, "Enter date in YYYY/MM/DD format", Toast.LENGTH_SHORT).show()
+                    else -> {
+                        val request = AddProductRequest(
+                            user_id = user_id,
+                            type = type,
+                            company = trimmedCompany,
+                            model_name = trimmedModel,
+                            months_of_warranty = trimmedWarranty.toIntOrNull() ?: 0,
+                            purchase_date = trimmedDate,
+                            price = trimmedPrice.toDoubleOrNull() ?: 0.0
+                        )
+                        onAddProduct(request)
+                        onDismiss()  // ✅ Only if all validations pass
+                    }
+                }
             }) {
                 Text("Add")
             }
@@ -454,4 +471,17 @@ fun AddProductForm(
             }
         }
     )
+}
+
+
+fun isValidDate(input : String) : Boolean {
+        val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+        formatter.isLenient = false
+    return try {
+        formatter.parse(input)
+        true
+    }
+    catch (ex : Exception){
+        false
+    }
 }
