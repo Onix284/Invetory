@@ -22,7 +22,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,6 +37,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
@@ -62,6 +66,7 @@ import com.example.invetory.model.DashBoardModel.AddProductRequest
 import com.example.invetory.model.DashBoardModel.ProductData
 import com.example.invetory.navigation.Screen
 import com.example.invetory.ui.theme.fontFamily
+import io.ktor.client.request.request
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -95,6 +100,8 @@ fun UserDashboardScreen(
     val context = LocalContext.current
 
     var isFormOpen by remember { mutableStateOf(false) }
+
+    var searchQuery by remember { mutableStateOf("") }
 
 
     LaunchedEffect(user_id) {
@@ -230,6 +237,13 @@ fun UserDashboardScreen(
                     }
                 }
 
+
+                SimpleSearchBar(
+                    query = searchQuery,
+                    onQueryChange = {searchQuery = it},
+                    modifier = Modifier.padding(horizontal = 15.dp)
+                )
+
                 //handle state
                 when {
                         //if loading
@@ -320,13 +334,13 @@ fun ProductCard(productData: ProductData) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 15.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         colors = CardDefaults.cardColors(Color.Magenta)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .size(120.dp)
+                .height(150.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -349,11 +363,6 @@ fun ProductCard(productData: ProductData) {
                             .align(alignment = Alignment.End)
                             .padding(10.dp)
                     )
-                }
-                Column(
-                    modifier = Modifier
-                        .padding(15.dp)
-                ) {
                     Text(
                         text = "Model : ${productData.model_name} ",
                         fontFamily = fontFamily,
@@ -362,14 +371,38 @@ fun ProductCard(productData: ProductData) {
                             .align(alignment = Alignment.End)
                             .padding(5.dp)
                     )
-                    Text(
-                        text = productData.price + "₹",
-                        fontFamily = fontFamily,
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .align(alignment = Alignment.End)
-                            .padding(10.dp)
-                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(15.dp)
+                ) {
+                    Box(modifier = Modifier.fillMaxHeight()){
+                        Text(
+                            text = productData.price + "₹",
+                            fontFamily = fontFamily,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .align(alignment = Alignment.TopEnd)
+                                .padding(10.dp)
+                        )
+
+                        Row(modifier = Modifier.align(Alignment.BottomEnd)){
+
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.align(Alignment.Bottom)
+                                    .padding(end = 20.dp)
+                            )
+
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                modifier = Modifier.align(Alignment.Bottom)
+                                    .padding(end = 5.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -471,7 +504,7 @@ fun AddProductForm(
                     }
                 }
             }) {
-                Text("Next")
+                Text("Add")
             }
         },
         dismissButton = {
@@ -482,6 +515,21 @@ fun AddProductForm(
     )
 }
 
+@Composable
+fun SimpleSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        label = { Text("Search") },
+        singleLine = true,
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        modifier = modifier.fillMaxWidth()
+    )
+}
 
 fun isValidDate(input : String) : Boolean {
         val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
