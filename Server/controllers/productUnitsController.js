@@ -45,10 +45,8 @@ exports.addProductUnits = (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Product units added successfully',
-            data: {
-                affectedRows: results.affectedRows
-            }
+            message: `${serials.length} serial numbers added`,
+            inserted : serials
         });
     });
 };  

@@ -4,6 +4,8 @@ import android.util.Log
 import com.example.invetory.Constants
 import com.example.invetory.model.DashBoardModel.AddProductRequest
 import com.example.invetory.model.DashBoardModel.AddProductResponse
+import com.example.invetory.model.DashBoardModel.AddProductUnitRequest
+import com.example.invetory.model.DashBoardModel.AddProductUnitResponse
 import com.example.invetory.model.DashBoardModel.AllProductsListResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -23,6 +25,12 @@ class DashboardApiService @Inject constructor(
 
     suspend fun addNewProduct(request: AddProductRequest) : AddProductResponse{
         return client.post("$baseUrl/product/add"){
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun addNewProductUnit(request: AddProductUnitRequest) : AddProductUnitResponse{
+        return client.post("$baseUrl/productUnits/add"){
             setBody(request)
         }.body()
     }

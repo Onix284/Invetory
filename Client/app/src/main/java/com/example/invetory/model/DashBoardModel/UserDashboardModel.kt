@@ -39,3 +39,22 @@ data class AddProductResponse(
     val message: String,
     val product : ProductData? = null
 )
+
+
+@Serializable
+data class AddProductUnitRequest(
+    val product_id : Int,
+    val serial_number : List<String>
+)
+
+@Serializable
+data class AddProductUnitResponse(
+    val success: Boolean,
+    val message: String,
+    val inserted : List<Serials>? = null
+)
+
+@Serializable
+data class Serials(
+    val serialNumber : String
+)

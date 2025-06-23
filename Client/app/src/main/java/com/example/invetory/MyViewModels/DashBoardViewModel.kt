@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.invetory.Network.ServiceAPIs.DashboardApiService
 import com.example.invetory.model.DashBoardModel.AddProductRequest
+import com.example.invetory.model.DashBoardModel.AddProductUnitRequest
+import com.example.invetory.model.DashBoardModel.AddProductUnitResponse
 import com.example.invetory.model.DashBoardModel.ProductData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,9 @@ class DashBoardViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _productUnitsResponse = MutableStateFlow<AddProductUnitResponse?>(null)
+    val productUnitsResponse : StateFlow<AddProductUnitResponse?> = _productUnitsResponse
 
     fun fetchAllProducts(user_id: Int?){
         viewModelScope.launch {
@@ -59,6 +64,7 @@ class DashBoardViewModel @Inject constructor(
 
                 if(response.success){
                     fetchAllProducts(productRequest.user_id)
+                    Log.d("ProductUnit", "addNewProduct: ${response.product?.id} ")
                 }
             }
             catch (e : Exception){
@@ -68,5 +74,34 @@ class DashBoardViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
+    }
+
+    fun addProductUnits(productId: Int, serials: List<String>){
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val request = AddProductUnitRequest(
+                    productId,
+                    serials
+                )
+                val response = dashboardApiService.addNewProductUnit(request)
+                _productUnitsResponse.value = response
+            }
+            catch (e : Exception){
+                Log.e("AddProductUnitVM", "API error", e)
+                _productUnitsResponse.value = AddProductUnitResponse(
+                    success = false,
+                    message = "Something went wrong",
+                    inserted = null
+                )
+            }
+            finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun clearUnitResponse() {
+        _productUnitsResponse.value = null
     }
 }

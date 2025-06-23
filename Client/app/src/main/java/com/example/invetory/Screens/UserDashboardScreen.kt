@@ -2,7 +2,6 @@ package com.example.invetory.Screens
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +41,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,6 +60,7 @@ import androidx.navigation.NavController
 import com.example.invetory.MyViewModels.AuthViewModels
 import com.example.invetory.MyViewModels.DashBoardViewModel
 import com.example.invetory.model.DashBoardModel.AddProductRequest
+import com.example.invetory.model.DashBoardModel.AddProductUnitRequest
 import com.example.invetory.model.DashBoardModel.ProductData
 import com.example.invetory.navigation.Screen
 import com.example.invetory.ui.theme.fontFamily
@@ -94,6 +96,10 @@ fun UserDashboardScreen(
     //Add product dialog form
     var isFormOpen by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    var showSerialForm by remember { mutableStateOf(false) }
+    var lastAddedProductId by remember { mutableStateOf<Int?>(null) }
+    var lastQuantity by remember { mutableStateOf(1) }
 
 
     LaunchedEffect(user_id) {
@@ -301,10 +307,33 @@ fun UserDashboardScreen(
                 AddProductForm(
                     context = context,
                     onDismiss = {isFormOpen = false},
-                    onAddProduct = { request ->
+                    onAddProduct = { request,  quantity ->
                         dashBoardViewModel.addNewProduct(request)
+
+                        lastQuantity = quantity
+                        isFormOpen = false
+                        showSerialForm = true
                     },
                     user_id = user.id
+                )
+            }
+
+            if (showSerialForm && lastAddedProductId != null) {
+                AddProductUnitsForm(
+                    context = context,
+                    onDismiss = {
+                        showSerialForm = false
+                        lastAddedProductId = null
+                    },
+                    onAddSerial = { request ->
+                        dashBoardViewModel.addProductUnits(
+                            request.product_id,
+                            request.serial_number
+                        )
+                        showSerialForm = false
+                    },
+                    productId = lastAddedProductId!!,
+                    quantity = lastQuantity
                 )
             }
         }
@@ -378,7 +407,7 @@ fun ProductCard(productData: ProductData) {
 fun AddProductForm(
     context : Context,
     onDismiss : () -> Unit,
-    onAddProduct : (AddProductRequest) -> Unit,
+    onAddProduct : (AddProductRequest , quantity : Int) -> Unit,
     user_id : Int
 ){
     var type by remember { mutableStateOf("Battery") }
@@ -387,13 +416,16 @@ fun AddProductForm(
     var warranty by remember { mutableStateOf("") }
     var purchaseDate by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+    var quantity by remember { mutableIntStateOf(1) }
 
+    var productUnitsFormIsOn by remember { mutableStateOf(false) }
 
     val companyRegex = Regex("^[A-Za-z0-9\\s]{2,30}$")
     val modelRegex = Regex("^[A-Za-z0-9\\- ]{2,50}$")
     val warrantyRegex = Regex("^\\d{1,2}$")
     val priceRegex = Regex("^\\d{1,7}(\\.\\d{1,2})?$")
     val dateRegex = Regex("^\\d{4}/\\d{2}/\\d{2}$")
+    val quantityRegex = Regex("^\\d{2}\$")
 
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
@@ -421,6 +453,8 @@ fun AddProductForm(
                 OutlinedTextField(value = warranty, onValueChange = { warranty = it }, label = { Text("Warranty (months)") })
                 OutlinedTextField(value = purchaseDate, onValueChange = { purchaseDate = it }, label = { Text("Purchase Date") }, placeholder = {Text("YYYY/MM/DD")})
                 OutlinedTextField(value = price, onValueChange = { price = it }, label = { Text("Price") })
+                OutlinedTextField(value = quantity.toString(), onValueChange = { quantity = it.toIntOrNull() ?: 0 }, label = { Text("Quantity") })
+
             }
         },
         confirmButton = {
@@ -457,12 +491,13 @@ fun AddProductForm(
                             purchase_date = trimmedDate,
                             price = trimmedPrice.toDoubleOrNull() ?: 0.0
                         )
-                        onAddProduct(request)
+                        val currentQuantity = quantity
+                        onAddProduct(request, currentQuantity)
                         onDismiss()  // ✅ Only if all validations pass
                     }
                 }
             }) {
-                Text("Add")
+                Text("Next")
             }
         },
         dismissButton = {
@@ -484,4 +519,60 @@ fun isValidDate(input : String) : Boolean {
     catch (ex : Exception){
         false
     }
+}
+
+@Composable
+fun AddProductUnitsForm(
+    context: Context,
+    onDismiss: () -> Unit,
+    onAddSerial: (AddProductUnitRequest) -> Unit,
+    productId : Int,
+    quantity : Int
+){
+    val serialNumbers = remember { mutableStateListOf(*Array(quantity) { "" }) }
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Enter $quantity Serial Numbers", fontFamily = fontFamily)
+        },
+        text = {
+            Column {
+                serialNumbers.forEachIndexed { index, value ->
+                    OutlinedTextField(
+                        value = value,
+                        onValueChange = {
+                            serialNumbers[index] = it
+                        },
+                        label = { Text("Serial Number ${index + 1}") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                if (serialNumbers.any { it.isBlank() }) {
+                    Toast.makeText(context, "All serial numbers must be filled", Toast.LENGTH_SHORT).show()
+                } else {
+                    onAddSerial(
+                        AddProductUnitRequest(
+                            product_id = productId,
+                            serial_number = serialNumbers.toList()
+                        )
+                    )
+                    onDismiss()
+                }
+            }) {
+                Text("Submit")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
