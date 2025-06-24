@@ -5,8 +5,10 @@ import com.example.invetory.Constants
 import com.example.invetory.model.DashBoardModel.AddProductRequest
 import com.example.invetory.model.DashBoardModel.AddProductResponse
 import com.example.invetory.model.DashBoardModel.AllProductsListResponse
+import com.example.invetory.model.DashBoardModel.DeleteProductResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -25,5 +27,9 @@ class DashboardApiService @Inject constructor(
         return client.post("$baseUrl/product/add"){
             setBody(request)
         }.body()
+    }
+
+    suspend fun deleteProduct(product_id : Int) : DeleteProductResponse {
+        return client.delete("$baseUrl/product/delete/$product_id").body()
     }
 }

@@ -42,3 +42,9 @@ data class AddProductResponse(
     val product : ProductData? = null,
 )
 
+@Serializable
+data class DeleteProductResponse(
+    val success: Boolean,
+    val message: String
+)
+

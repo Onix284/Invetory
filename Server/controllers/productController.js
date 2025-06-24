@@ -118,10 +118,11 @@ exports.updateProduct = (req, res) => {
         model_name,
         months_of_warranty,
         purchase_date,
-        price
+        price,
+        quantity
     } = req.body;
 
-    if (!product_id || !type || !company || !model_name || !months_of_warranty || !purchase_date || !price) {
+    if (!product_id || !type || !company || !model_name || !months_of_warranty || !purchase_date || !price || !quantity) {
         return res.status(400).json({
             success: false,
             message: "All fields are required",
@@ -135,7 +136,8 @@ exports.updateProduct = (req, res) => {
             model_name = ?, 
             months_of_warranty = ?, 
             purchase_date = ?, 
-            price = ?
+            price = ?,
+            quantity = ?
         WHERE id = ?
     `;
 
@@ -146,7 +148,8 @@ exports.updateProduct = (req, res) => {
         months_of_warranty,
         purchase_date,
         price,
-        product_id
+        product_id,
+        quantity,
     ];
 
     db.query(query, values, (err, result) => {

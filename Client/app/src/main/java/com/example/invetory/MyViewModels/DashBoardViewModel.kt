@@ -48,7 +48,8 @@ class DashBoardViewModel @Inject constructor(
     }
 
     fun addNewProduct(productRequest: AddProductRequest,
-                      onSuccess : (ProductData) -> Unit){
+                      onSuccess : (ProductData) -> Unit
+    ){
         _isLoading.value = true
         _error.value = null
 
@@ -69,6 +70,30 @@ class DashBoardViewModel @Inject constructor(
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    fun deleteProduct(productId : Int, user_id: Int?){
+        _error.value = null
+        viewModelScope.launch {
+
+            try {
+                val response = dashboardApiService.deleteProduct(productId)
+                if(response.success){
+                    _error.value = null
+                    fetchAllProducts(user_id)
+                }
+                else{
+                    _error.value = response.message
+                }
+            }
+            catch (e : Exception){
+                _error.value = e.message
+            }
+            finally {
+                _isLoading.value = false
+            }
+
         }
     }
 }

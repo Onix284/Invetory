@@ -1,7 +1,9 @@
 package com.example.invetory.Screens
 
+import android.R.attr.contentDescription
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,9 +37,9 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
@@ -66,7 +68,6 @@ import com.example.invetory.model.DashBoardModel.AddProductRequest
 import com.example.invetory.model.DashBoardModel.ProductData
 import com.example.invetory.navigation.Screen
 import com.example.invetory.ui.theme.fontFamily
-import io.ktor.client.request.request
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -90,7 +91,7 @@ fun UserDashboardScreen(
     //Sort by type
     val categories = listOf("Battery", "Inverter")
     var selectedCategory by remember { mutableStateOf("Battery") }
-    val filterProductList = products.filter { it.type.equals(selectedCategory, ignoreCase = true) }
+
 
     //Drawer state
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -101,8 +102,15 @@ fun UserDashboardScreen(
 
     var isFormOpen by remember { mutableStateOf(false) }
 
+    //Search
     var searchQuery by remember { mutableStateOf("") }
 
+    val filteredProducts = products.filter {
+        it.type.equals(selectedCategory, ignoreCase = true) &&
+                (it.company.contains(searchQuery, ignoreCase = true) ||
+                    it.model_name.contains(searchQuery, ignoreCase = true)
+                        )
+    }
 
     LaunchedEffect(user_id) {
         if (user_id != null) {
@@ -244,6 +252,10 @@ fun UserDashboardScreen(
                     modifier = Modifier.padding(horizontal = 15.dp)
                 )
 
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)){  }
+
                 //handle state
                 when {
                         //if loading
@@ -286,8 +298,8 @@ fun UserDashboardScreen(
                     //Main list of products
                     else -> {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(filterProductList) { product ->
-                                ProductCard(product)
+                            items(filteredProducts) { product ->
+                                ProductCard(product, dashBoardViewModel)
                             }
                         }
                     }
@@ -330,7 +342,7 @@ fun UserDashboardScreen(
 }
 
 @Composable
-fun ProductCard(productData: ProductData) {
+fun ProductCard(productData: ProductData, viewModel: DashBoardViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -391,16 +403,21 @@ fun ProductCard(productData: ProductData) {
                             Icon(
                                 Icons.Default.Edit,
                                 contentDescription = null,
-                                modifier = Modifier.align(Alignment.Bottom)
+                                modifier = Modifier
+                                    .align(Alignment.Bottom)
                                     .padding(end = 20.dp)
                             )
 
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = null,
-                                modifier = Modifier.align(Alignment.Bottom)
+                            IconButton(
+                                onClick = { viewModel.deleteProduct(productData.id, productData.user_id) },
+                                modifier = Modifier
+                                    .align(Alignment.Bottom)
                                     .padding(end = 5.dp)
-                            )
+                            ){
+                                Icon(Icons.Default.Delete,
+                                contentDescription = null,
+                                )
+                            }
                         }
                     }
                 }
