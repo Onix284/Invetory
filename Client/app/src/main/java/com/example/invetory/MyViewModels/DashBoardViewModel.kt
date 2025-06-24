@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.invetory.Network.ServiceAPIs.DashboardApiService
 import com.example.invetory.model.DashBoardModel.AddProductRequest
 import com.example.invetory.model.DashBoardModel.ProductData
+import com.example.invetory.model.DashBoardModel.ProductUpdateRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -93,7 +94,32 @@ class DashBoardViewModel @Inject constructor(
             finally {
                 _isLoading.value = false
             }
+        }
+    }
 
+
+    fun updateProduct( productId: Int,
+                       request: ProductUpdateRequest,
+                       user_id: Int?) {
+        _error.value = null
+        _isLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = dashboardApiService.updateProduct(productId, request)
+                if(response.success){
+                    _error.value = null
+                    fetchAllProducts(user_id)
+                }
+                else{
+                    _error.value = response.message
+                }
+            }
+            catch (e : Exception){
+                _error.value = e.message
+            }
+            finally {
+                _isLoading.value = false
+            }
         }
     }
 }

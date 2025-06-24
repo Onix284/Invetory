@@ -1,9 +1,7 @@
 package com.example.invetory.Screens
 
-import android.R.attr.contentDescription
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,6 +64,7 @@ import com.example.invetory.MyViewModels.AuthViewModels
 import com.example.invetory.MyViewModels.DashBoardViewModel
 import com.example.invetory.model.DashBoardModel.AddProductRequest
 import com.example.invetory.model.DashBoardModel.ProductData
+import com.example.invetory.model.DashBoardModel.ProductUpdateRequest
 import com.example.invetory.navigation.Screen
 import com.example.invetory.ui.theme.fontFamily
 import kotlinx.coroutines.launch
@@ -101,6 +100,7 @@ fun UserDashboardScreen(
     val context = LocalContext.current
 
     var isFormOpen by remember { mutableStateOf(false) }
+    var productToEdit by remember { mutableStateOf<ProductData?>(null) }
 
     //Search
     var searchQuery by remember { mutableStateOf("") }
@@ -299,7 +299,15 @@ fun UserDashboardScreen(
                     else -> {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(filteredProducts) { product ->
-                                ProductCard(product, dashBoardViewModel)
+                                ProductCard(productData = product,
+                                    onEditClick = {
+                                        productToEdit = product
+                                        isFormOpen = true
+                                    },
+                                    onDeleteClick = {
+                                        dashBoardViewModel.deleteProduct(product.id, product.user_id)
+                                    }
+                                )
                             }
                         }
                     }
@@ -327,14 +335,48 @@ fun UserDashboardScreen(
             if (isFormOpen && user != null) {
                 AddProductForm(
                     context = context,
-                    user_id = user.id,
-                    onDismiss = { isFormOpen = false },
-                    onAddProduct = { request ->
-                        dashBoardViewModel.addNewProduct(request) { addedProduct ->
-                            Toast.makeText(context, "${addedProduct.model_name} added!", Toast.LENGTH_SHORT).show()
-                            isFormOpen = false
+                    onDismiss = { isFormOpen = false
+                                productToEdit = null},
+                    onAddProduct = { request, isEdit, productId ->
+                        if (isEdit && productId != -1) {
+
+                            val updateRequest = ProductUpdateRequest(
+                                type = request.type,
+                                company = request.company,
+                                model_name = request.model_name,
+                                months_of_warranty = request.months_of_warranty,
+                                purchase_date = request.purchase_date,
+                                price = request.price,
+                                quantity = request.quantity
+                            )
+
+                            dashBoardViewModel.updateProduct(
+                                productId =  productId,
+                                request =  updateRequest,
+                                user_id =  user.id)
+
+                        } else {
+
+                            val request = AddProductRequest(
+                                user_id = user.id,
+                                type = request.type,
+                                company = request.company,
+                                model_name = request.model_name,
+                                months_of_warranty = request.months_of_warranty,
+                                purchase_date = request.purchase_date,
+                                price = request.price,
+                                quantity = request.quantity
+                            )
+
+                            dashBoardViewModel.addNewProduct(request) {
+                                addedProduct ->
+                                Toast.makeText(context, "Added", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
+                        isFormOpen = false
+                        productToEdit = null
+                    },
+                    initialProduct = productToEdit
                 )
             }
         }
@@ -342,7 +384,10 @@ fun UserDashboardScreen(
 }
 
 @Composable
-fun ProductCard(productData: ProductData, viewModel: DashBoardViewModel) {
+fun ProductCard(
+    productData: ProductData,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -399,17 +444,20 @@ fun ProductCard(productData: ProductData, viewModel: DashBoardViewModel) {
                         )
 
                         Row(modifier = Modifier.align(Alignment.BottomEnd)){
-
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = null,
+                            IconButton(
+                                onClick = onEditClick,
                                 modifier = Modifier
                                     .align(Alignment.Bottom)
                                     .padding(end = 20.dp)
-                            )
+                            ) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = null,
+                                )
+                            }
 
                             IconButton(
-                                onClick = { viewModel.deleteProduct(productData.id, productData.user_id) },
+                                onClick = onDeleteClick,
                                 modifier = Modifier
                                     .align(Alignment.Bottom)
                                     .padding(end = 5.dp)
@@ -431,17 +479,21 @@ fun ProductCard(productData: ProductData, viewModel: DashBoardViewModel) {
 @Composable
 fun AddProductForm(
     context : Context,
-    user_id : Int,
     onDismiss : () -> Unit,
-    onAddProduct : (AddProductRequest) -> Unit,
+    onAddProduct : (ProductUpdateRequest, isEdit : Boolean, productId : Int) -> Unit,
+    initialProduct: ProductData? = null
 ){
-    var type by remember { mutableStateOf("Battery") }
-    var company by remember { mutableStateOf("") }
-    var modelName by remember { mutableStateOf("") }
-    var warranty by remember { mutableStateOf("") }
-    var purchaseDate by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-    var quantity by remember { mutableIntStateOf(1) }
+
+    val isEdit = initialProduct != null
+
+
+    var type by remember { mutableStateOf(initialProduct?.type ?: "Battery") }
+    var company by remember { mutableStateOf(initialProduct?.company ?: "") }
+    var modelName by remember { mutableStateOf(initialProduct?.model_name ?: "") }
+    var warranty by remember { mutableStateOf(initialProduct?.months_of_warranty?.toString() ?: "") }
+    var purchaseDate by remember { mutableStateOf(initialProduct?.purchase_date?.let { cleanDate(it) }) }
+    var price by remember { mutableStateOf(initialProduct?.price ?: "") }
+    var quantity by remember { mutableIntStateOf(initialProduct?.quantity ?: 1) }
 
 
     val companyRegex = Regex("^[A-Za-z0-9\\s]{2,30}$")
@@ -474,7 +526,7 @@ fun AddProductForm(
                 OutlinedTextField(value = company, onValueChange = { company = it }, label = { Text("Company") })
                 OutlinedTextField(value = modelName, onValueChange = { modelName = it }, label = { Text("Model Name") })
                 OutlinedTextField(value = warranty, onValueChange = { warranty = it }, label = { Text("Warranty (months)") })
-                OutlinedTextField(value = purchaseDate, onValueChange = { purchaseDate = it }, label = { Text("Purchase Date") }, placeholder = {Text("YYYY/MM/DD")})
+                OutlinedTextField(value = purchaseDate.toString(), onValueChange = { purchaseDate = it }, label = { Text("Purchase Date") }, placeholder = {Text("YYYY/MM/DD")})
                 OutlinedTextField(value = price, onValueChange = { price = it }, label = { Text("Price") })
                 OutlinedTextField(value = quantity.toString(), onValueChange = { quantity = it.toIntOrNull() ?: 0 }, label = { Text("Quantity") })
 
@@ -485,7 +537,7 @@ fun AddProductForm(
                 val trimmedCompany = company.trim()
                 val trimmedModel = modelName.trim()
                 val trimmedWarranty = warranty.trim()
-                val trimmedDate = purchaseDate.trim()
+                val trimmedDate = purchaseDate!!.trim()
                 val trimmedPrice = price.trim()
 
                 if(!isValidDate(trimmedDate)){
@@ -506,8 +558,7 @@ fun AddProductForm(
                     quantity <= 0 ->
                         Toast.makeText(context, "Quantity must be at least 1", Toast.LENGTH_SHORT).show()
                     else -> {
-                        val request = AddProductRequest(
-                            user_id = user_id,
+                        val request = ProductUpdateRequest(
                             type = type,
                             company = trimmedCompany,
                             model_name = trimmedModel,
@@ -516,12 +567,12 @@ fun AddProductForm(
                             price = trimmedPrice.toDoubleOrNull() ?: 0.0,
                             quantity = quantity
                         )
-                        onAddProduct(request)
+                        onAddProduct(request, isEdit, initialProduct?.id ?: -1)
                         onDismiss()  // ✅ Only if all validations pass
                     }
                 }
             }) {
-                Text("Add")
+                Text(if (isEdit) "Update" else "Add")
             }
         },
         dismissButton = {
@@ -558,4 +609,8 @@ fun isValidDate(input : String) : Boolean {
     catch (ex : Exception){
         false
     }
+}
+
+fun cleanDate(dateTime: String): String {
+    return dateTime.split("T").firstOrNull() ?: dateTime
 }

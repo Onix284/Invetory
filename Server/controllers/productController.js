@@ -76,7 +76,7 @@ exports.addProduct = (req, res) => {
 
     const query = `
         INSERT INTO products (user_id, type, company, model_name, months_of_warranty, purchase_date, price, quantity)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [user_id, type, company, model_name, months_of_warranty, purchase_date, price, quantity];
@@ -108,11 +108,9 @@ exports.addProduct = (req, res) => {
     });
 };
 
-
-// Update existing product
+//Update product by ID
 exports.updateProduct = (req, res) => {
     const {
-        product_id,
         type,
         company,
         model_name,
@@ -122,6 +120,8 @@ exports.updateProduct = (req, res) => {
         quantity
     } = req.body;
 
+    const product_id = req.params.product_id; // ✅ take from URL
+
     if (!product_id || !type || !company || !model_name || !months_of_warranty || !purchase_date || !price || !quantity) {
         return res.status(400).json({
             success: false,
@@ -130,27 +130,27 @@ exports.updateProduct = (req, res) => {
     }
 
     const query = `
-        UPDATE products SET 
-            type = ?, 
-            company = ?, 
-            model_name = ?, 
-            months_of_warranty = ?, 
-            purchase_date = ?, 
-            price = ?,
-            quantity = ?
-        WHERE id = ?
-    `;
+    UPDATE products SET 
+        type = ?, 
+        company = ?, 
+        model_name = ?, 
+        months_of_warranty = ?, 
+        purchase_date = ?, 
+        price = ?, 
+        quantity = ?
+    WHERE id = ?
+`;
 
-    const values = [
-        type,
-        company,
-        model_name,
-        months_of_warranty,
-        purchase_date,
-        price,
-        product_id,
-        quantity,
-    ];
+  const values = [
+    type,
+    company,
+    model_name,
+    months_of_warranty,
+    purchase_date,
+    price,
+    quantity,
+    product_id
+];
 
     db.query(query, values, (err, result) => {
         if (err) {

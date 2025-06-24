@@ -48,3 +48,20 @@ data class DeleteProductResponse(
     val message: String
 )
 
+@Serializable
+data class ProductUpdateRequest(
+    val type : String,
+    val company : String,
+    val model_name : String,
+    val months_of_warranty : Int,
+    val purchase_date : String,
+    val price : Double,
+    val quantity : Int
+)
+
+@Serializable
+data class ProductUpdateResponse(
+    val success : Boolean,
+    val message: String
+)
+
